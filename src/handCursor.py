@@ -37,7 +37,7 @@ class Hand(pygame.sprite.Sprite):
             self.frame_hand = 0
             self.grab = False
         screen.blit(self.hand[self.frame_hand%2],(cursor_x,cursor_y))
-        spriteGroup.handCursor.draw(screen)
+        #spriteGroup.handCursor.draw(screen)
 
     def drawCircle(self,pos,event,screen,kirby,spriteGroup):
         x, y = pos
