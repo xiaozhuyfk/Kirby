@@ -1,0 +1,24 @@
+import pygame, os, sys, kirby
+from pygame.locals import *
+
+pygame.init()
+window = pygame.display.set_mode((600,400),0,32)
+pygame.display.set_caption("Kirby")
+screen = pygame.display.get_surface()
+kirby = kirby.kirby()
+clock = pygame.time.Clock()
+
+while True:
+    event = pygame.event.poll()
+    key = pygame.key.get_pressed()
+    if event.type == QUIT:
+        exit()
+    if event.type == KEYDOWN:
+        if event.key == K_ESCAPE:
+            exit()
+    screen.fill((255,255,255))
+
+    kirby.update(event,screen,key)
+    # kirby.jump(event,screen,key)
+    clock.tick(20)
+    pygame.display.update()
