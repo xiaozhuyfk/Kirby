@@ -8,5 +8,7 @@ class spriteGroup(object):
         self.enemies = pygame.sprite.Group()
         self.landscape = pygame.sprite.Group()
         self.dragable = pygame.sprite.Group()
-        self.spark = pygame.sprite.Group()
+        self.sparkshield = pygame.sprite.Group()
         self.circlePixel = pygame.sprite.Group()
+        self.pikey = pygame.sprite.Group()
+        self.shotzo = pygame.sprite.Group()
