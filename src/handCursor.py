@@ -25,7 +25,45 @@ class Hand(pygame.sprite.Sprite):
         self.startTime = 0
         self.endTime = 0
 
+        self.fist1 = load.load_image("fist1.png")
+        self.fist2 = load.load_image("fist2.png")
+        self.fist3 = load.load_image("fist3.png")
+        self.fist4 = load.load_image("fist4.png")
+        self.fist5 = load.load_image("fist5.png")
+        self.fist = [self.hand1,self.fist1,self.fist2,self.fist3,
+                     self.fist4,self.fist5,self.fist5,self.fist5,
+                     self.fist5]
+        self.fistState = False
+        self.fistEnd = False
+        self.x2, self.y2 = 0, 0
+        self.sprite = block.Block(45,45)
+        self.speed_y = 15
+        self.frame = 0
+        self.frame_end = 0
+
+    def hit(self,screen,spriteGroup):
+        if self.y2 > 307:
+            self.fistEnd = True
+            self.y2 = 307
+        elif self.fistEnd == False:
+            self.y2 += self.speed_y
+        if self.frame%9 != 7:
+            self.frame += 1
+        if self.fistEnd:
+            spriteGroup.fist.empty()
+            self.frame_end += 1
+        if self.frame_end > 10:
+            self.fistState = False
+            self.frame_end = 0
+            self.frame = 0
+        screen.blit(self.fist[self.frame%9],(self.x2,self.y2))
+        self.sprite.rect.x = self.x2+5
+        self.sprite.rect.y = self.y2+10
+        if self.fistEnd == False:
+            spriteGroup.fist.add(self.sprite)
+        
     def cursor(self,pos,event,screen,kirby,spriteGroup):
+        #spriteGroup.fist.draw(screen)
         x, y = pos
         self.x, self.y = x, y
         self.event = event
@@ -38,6 +76,7 @@ class Hand(pygame.sprite.Sprite):
             self.frame_hand = 1
             self.startPos = (x, y)
             self.startTime = time.time()
+            self.fistState = False
         elif event[0] == 0:
             self.frame_hand = 0
             self.grab = False
@@ -48,8 +87,16 @@ class Hand(pygame.sprite.Sprite):
             delta = self.endTime - self.startTime
             self.vector = ((self.endPos[0]-self.startPos[0])/delta,
                            (self.endPos[1]-self.startPos[1])/delta)
-
-        screen.blit(self.hand[self.frame_hand%2],(cursor_x,cursor_y))
+        if event[2] == 1 and cursor_y < 307:
+            self.fistState = True
+            self.x2, self.y2 = cursor_x, cursor_y
+            self.frame, self.frame_end = 0, 0
+        if self.fistState == False:
+            screen.blit(self.hand[self.frame_hand%2],(cursor_x,cursor_y))
+            spriteGroup.fist.empty()
+            self.fistEnd = False
+        else:
+            self.hit(screen,spriteGroup)
         #spriteGroup.handCursor.draw(screen)
 
     def drag(self,event,spriteGroup):

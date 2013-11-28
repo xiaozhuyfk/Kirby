@@ -1,4 +1,4 @@
-import pygame, load, random, spriteGroup, block
+import pygame, load, random, spriteGroup, block, time
 from pygame.locals import *
 
 #block = block.Block(16,16)
@@ -120,7 +120,10 @@ class kirby(pygame.sprite.Sprite):
         self.airstate = False
         self.flystate = False
         self.blowstate = False
-        self.life = 6
+        self.doubleJump = False
+        self.djTime = 0
+        self.life = 10
+        self.dead = False
 
         self.spark1 = load.load_image("spark1.png")
         self.spark2 = load.load_image("spark2.png")
@@ -138,6 +141,33 @@ class kirby(pygame.sprite.Sprite):
         self.invincible = False
         self.sprite = block.Block(16,16)
         self.sprite_spark = block.Block(60,60)
+
+    def init(self):
+        self.x = 300
+        self.y = 336
+        self.speed_x = 0
+        self.speed_x2 = 0
+        self.speed_y = 0
+        self.speed_y2 = 0
+        self.frame_w = 0
+        self.frame_f = 0
+        self.frame_turn = 0
+        self.frame_blow = -1
+        self.left = False
+        self.gravity = 0.8
+        self.gravity2 = 0.1
+        self.airstate = False
+        self.flystate = False
+        self.blowstate = False
+        self.doubleJump = False
+        self.djTime = 0
+        self.life = 10
+        self.frame_spark = 0
+        self.fire = False
+        self.frame_inv = 0
+        self.invincible = False
+        self.dead = False
+        
 
     def update(self,event,screen,key,spriteGroup):
         self.kirbyControl_a_right(screen,key,event)
@@ -303,6 +333,7 @@ class kirby(pygame.sprite.Sprite):
         if self.frame_spark > 150:
             self.fire = False
             self.frame_spark = 0
+            spriteGroup.sparkshield.empty()
         if self.invincible == False:    
             if self.airstate == False:
                 screen.blit(self.kirbyMove[self.frame_w%11],(self.x,self.y))
@@ -323,8 +354,13 @@ class kirby(pygame.sprite.Sprite):
 
     def checkState_p(self,screen,key,spriteGroup):
         if key[pygame.K_z] and self.airstate == False:
+            self.djTime = time.time()
             self.speed_y = 10
             self.airstate = True
+        elif self.airstate and key[pygame.K_z] and self.doubleJump == False:
+            if time.time()-self.djTime > 0.3:
+                self.doubleJump = True
+                self.speed_y = 8
 
         if self.airstate == True:
             self.y -= self.speed_y
@@ -336,6 +372,7 @@ class kirby(pygame.sprite.Sprite):
         if self.y > 336:
             self.airstate = False
             self.flystate = False
+            self.doubleJump = False
             self.speed_y = 0
             self.speed_y2 = 0
             self.y = 336

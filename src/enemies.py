@@ -14,7 +14,7 @@ class pikey(pygame.sprite.Sprite):
         self.x = x
         self.y = y
         self.speed_y = 3
-        self.gravity = 0.5
+        self.gravity = 0.3
         self.localGrab = False
         self.air = False
         self.dead = False
@@ -31,15 +31,10 @@ class pikey(pygame.sprite.Sprite):
             self.localGrab = False
             self.air = True
 
-    def throw(self,spriteGroup,hand,event):
-        pass
     # This function gives the movement of the pikey
     def movement(self,screen,spriteGroup,hand,event):
         self.drag(spriteGroup,hand,event)
         if self.air == False and self.localGrab == False:
-            self.sprite.rect.x = self.x + 3
-            self.sprite.rect.y = self.y + 3
-            spriteGroup.enemies.add(self.sprite)
             # Pikey bouncing up and down
             if self.y < 270:
                 self.speed_y = -self.speed_y
@@ -59,6 +54,9 @@ class pikey(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self.sprite,spriteGroup.sparkshield,False):
             self.dead = True
         self.frame += 1
+        self.sprite.rect.x = self.x 
+        self.sprite.rect.y = self.y 
+        spriteGroup.enemies.add(self.sprite)
         
 class shotzo(pygame.sprite.Sprite):
     def __init__(self,x,y):
@@ -74,7 +72,6 @@ class shotzo(pygame.sprite.Sprite):
         self.shotzo = [self.shotzo1, self.shotzo2, self.shotzo6,
                        self.shotzo7, self.shotzo4]
         self.sprite1 = block.Block(20,20)
-        self.sprite2 = block.Block(8,8)
         self.x = x
         self.y = y
         self.x2 = self.x
@@ -123,9 +120,6 @@ class bullet(pygame.sprite.Sprite):
         self.frame = 0
         
     def shoot(self,screen,spriteGroup):
-        self.sprite.rect.x = self.x-4
-        self.sprite.rect.y = self.y-4
-        spriteGroup.enemies.add(self.sprite)
         self.x += self.speed_x
         self.y += self.speed_y
         self.x -= 3
@@ -133,7 +127,11 @@ class bullet(pygame.sprite.Sprite):
         if self.x < -26 or self.x > 626:
             self.dead = True
         if pygame.sprite.spritecollide(self.sprite,spriteGroup.player,False):
+            spriteGroup.enemies.remove(self.sprite)
             self.dead = True
+        self.sprite.rect.x = self.x+4
+        self.sprite.rect.y = self.y+4
+        spriteGroup.enemies.add(self.sprite)
 
 class waddleDee(pygame.sprite.Sprite):
     def __init__(self,x,y):
@@ -142,17 +140,31 @@ class waddleDee(pygame.sprite.Sprite):
         self.waddleDee3 = load.load_image("waddleDee3.png")
         self.waddleDee4 = load.load_image("waddleDee4.png")
         self.waddleDee5 = load.load_image("waddleDee5.png")
-        self.waddleDee = [self.waddleDee1,self.waddleDee2,
-                          self.waddleDee3,self.waddleDee4]
+        self.waddleDee1i = load.load_image("waddleDee1i.png")
+        self.waddleDee2i = load.load_image("waddleDee2i.png")
+        self.waddleDee3i = load.load_image("waddleDee3i.png")
+        self.waddleDee4i = load.load_image("waddleDee4i.png")
+        self.waddleDee5i = load.load_image("waddleDee5i.png")
+        self.waddleDee = [self.waddleDee1,self.waddleDee1,
+                          self.waddleDee2,self.waddleDee2,
+                          self.waddleDee3,self.waddleDee3,
+                          self.waddleDee4,self.waddleDee4]
+        self.waddleDeei = [self.waddleDee1i,self.waddleDee1i,
+                           self.waddleDee2i,self.waddleDee2i,
+                           self.waddleDee3i,self.waddleDee3i,
+                           self.waddleDee4i,self.waddleDee4i]
+                          
         self.frame = 0
         self.sprite = block.Block(17,17)
         self.x = x
         self.y = y
+        self.speed_x = 2
         self.speed_y = 3
-        self.gravity = 0.5
+        self.gravity = 0.3
         self.localGrab = False
         self.air = False
         self.dead = False
+        self.left = True
 
     def drag(self,spriteGroup,hand,event):
         if pygame.sprite.spritecollide(self.sprite,spriteGroup.handCursor,False)\
@@ -166,22 +178,16 @@ class waddleDee(pygame.sprite.Sprite):
             self.localGrab = False
             self.air = True
 
-    def throw(self,spriteGroup,hand,event):
-        pass
     # This function gives the movement of the pikey
     def movement(self,screen,spriteGroup,hand,event):
         self.drag(spriteGroup,hand,event)
         if self.air == False and self.localGrab == False:
-            self.sprite.rect.x = self.x + 3
-            self.sprite.rect.y = self.y + 3
-            spriteGroup.enemies.add(self.sprite)
-            # Pikey bouncing up and down
-            if self.y < 270:
-                self.speed_y = -self.speed_y
             if self.y > 336:
                 self.y = 336
-                self.speed_y = -self.speed_y
-            self.y += self.speed_y
+            if self.frame % 50 == 1:
+                self.speed_x = -self.speed_x
+                self.left = not self.left
+            self.x -= self.speed_x
         elif self.air:
             self.y += self.speed_y
             self.speed_y += self.gravity
@@ -190,10 +196,103 @@ class waddleDee(pygame.sprite.Sprite):
                 self.speed_y = 3
                 self.air = False
         self.x -= 3
-        screen.blit(self.pikey[self.frame%4],(self.x,self.y))
+        if self.left:
+            screen.blit(self.waddleDee[self.frame%8],(self.x,self.y))
+        else:
+            screen.blit(self.waddleDeei[self.frame%8],(self.x,self.y))
         if pygame.sprite.spritecollide(self.sprite,spriteGroup.sparkshield,False):
             self.dead = True
+        if pygame.sprite.spritecollide(self.sprite,spriteGroup.fist,False):
+            self.dead = True
         self.frame += 1
+        self.sprite.rect.x = self.x + 3
+        self.sprite.rect.y = self.y + 3
+        spriteGroup.enemies.add(self.sprite)
+
+class waddleDoo(pygame.sprite.Sprite):
+    def __init__(self,x,y):
+        self.waddleDoo1 = load.load_image("waddleDoo1.png")
+        self.waddleDoo2 = load.load_image("waddleDoo2.png")
+        self.waddleDoo3 = load.load_image("waddleDoo3.png")
+        self.waddleDoo4 = load.load_image("waddleDoo4.png")
+        self.waddleDoo5 = load.load_image("waddleDoo5.png")
+        self.waddleDoo1i = load.load_image("waddleDoo1i.png")
+        self.waddleDoo2i = load.load_image("waddleDoo2i.png")
+        self.waddleDoo3i = load.load_image("waddleDoo3i.png")
+        self.waddleDoo4i = load.load_image("waddleDoo4i.png")
+        self.waddleDoo5i = load.load_image("waddleDoo5i.png")
+        self.waddleDoo = [self.waddleDoo1,self.waddleDoo1,
+                          self.waddleDoo2,self.waddleDoo2,
+                          self.waddleDoo3,self.waddleDoo3,
+                          self.waddleDoo4,self.waddleDoo4,
+                          self.waddleDoo5,self.waddleDoo5]
+        self.waddleDooi = [self.waddleDoo1i,self.waddleDoo1i,
+                           self.waddleDoo2i,self.waddleDoo2i,
+                           self.waddleDoo3i,self.waddleDoo3i,
+                           self.waddleDoo4i,self.waddleDoo4i,
+                           self.waddleDoo5i,self.waddleDoo5i]
+                          
+        self.frame = 0
+        self.sprite = block.Block(18,18)
+        self.x = x
+        self.y = y
+        self.speed_x = 2
+        self.speed_y = 3
+        self.gravity = 0.3
+        self.localGrab = False
+        self.air = False
+        self.dead = False
+        self.left = True
+
+    def drag(self,spriteGroup,hand,event):
+        if pygame.sprite.spritecollide(self.sprite,spriteGroup.handCursor,False)\
+                and event[0] == 1 and hand.grab == False:
+            hand.grab = True
+            self.localGrab = True
+        if self.localGrab:
+            self.x = hand.x-9
+            self.y = hand.y-9
+        if self.localGrab and hand.grab == False:
+            self.localGrab = False
+            self.air = True
+
+    # This function gives the movement of the pikey
+    def movement(self,screen,spriteGroup,hand,event):
+        self.drag(spriteGroup,hand,event)
+        if self.air == False and self.localGrab == False:
+            if self.y > 336:
+                self.y = 336
+            if self.frame % 60 == 1:
+                self.speed_x = -self.speed_x
+                self.left = not self.left
+            self.x -= self.speed_x
+        elif self.air:
+            self.y += self.speed_y
+            self.speed_y += self.gravity
+            if self.y > 336:
+                self.speed_y = 336
+                self.speed_y = 3
+                self.air = False
+        self.x -= 3
+        if self.localGrab == False:
+            if self.left:
+                screen.blit(self.waddleDoo[self.frame%10],(self.x,self.y))
+            else:
+                screen.blit(self.waddleDooi[self.frame%10],(self.x,self.y))
+        else:
+            if self.left:
+                screen.blit(self.waddleDoo5,(self.x,self.y))
+            else:
+                screen.blit(self.waddleDoo5i,(self.x,self.y))
+        if pygame.sprite.spritecollide(self.sprite,spriteGroup.sparkshield,False):
+            self.dead = True
+        if pygame.sprite.spritecollide(self.sprite,spriteGroup.fist,False):
+            self.dead = True
+        self.frame += 1
+        self.sprite.rect.x = self.x + 3
+        self.sprite.rect.y = self.y + 3
+        spriteGroup.enemies.add(self.sprite)
+        
         
         
         
