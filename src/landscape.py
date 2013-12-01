@@ -1,19 +1,25 @@
+# 15-112 Term Project
+# Hongyu Li + hongyul + Section J
+
+# landscape.py
+
 from pygame.locals import *
 import pygame, load, block
 
-block = block.Block(600,38)
-
+# background class
 class landscape(pygame.sprite.Sprite):
     def __init__(self):
         self.scene1 = load.load_scene("scene1.png")
         self.background1 = load.load_scene("background1.png")
         self.x = 0
         self.y = 312
+        self.block = block.Block(600,38)
 
     def create(self,screen,spriteGroup):
-        block.rect.x = 0
-        block.rect.y = 362
-        spriteGroup.landscape.add(block)
+        self.block.rect.x = 0
+        self.block.rect.y = 362
+        spriteGroup.landscape.add(self.block)
+        # init the location
         if self.x == -600:
             self.x = 0
         screen.blit(self.background1,(self.x,0))

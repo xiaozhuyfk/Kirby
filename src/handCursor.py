@@ -1,29 +1,44 @@
+# 15-112 Term Project
+# Hongyu Li + hongyul + Section J
+
+# handCursor.py
+
 from pygame.locals import *
 import pygame, load, block
 import kirby
 import spriteGroup
 import time
-
-block1 = block.Block(12,12)
+import math
 
 class Hand(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.hand1 = load.load_image("hand1.png")
-        self.hand2 = load.load_image("hand2.png")
-        self.hand3 = load.load_image("hand3.png")
-        self.hand4 = load.load_image("hand4.png")
-        self.hand = [self.hand1,self.hand4]
+        self.loadImage()
         self.frame_hand = 0
         self.grab = False
         self.circle_x = []
         self.circle_y = []
-        self.block1 = block.Block(12,12)
+        self.block1 = block.Block(16,16)
         self.vector = (0,0)
         self.startPos = (0,0)
         self.endPos = (0,0)
         self.startTime = 0
         self.endTime = 0
+        self.coordList = []
+        self.fistState = False
+        self.fistEnd = False
+        self.x2, self.y2 = 0, 0
+        self.sprite = block.Block(45,45)
+        self.speed_y = 15
+        self.frame = 0
+        self.frame_end = 0
+
+    def loadImage(self):
+        self.hand1 = load.load_image("hand1.png")
+        self.hand2 = load.load_image("hand2.png")
+        self.hand3 = load.load_image("hand3.png")
+        self.hand4 = load.load_image("hand4.png")
+        self.hand = [self.hand1,self.hand4]
 
         self.fist1 = load.load_image("fist1.png")
         self.fist2 = load.load_image("fist2.png")
@@ -33,14 +48,8 @@ class Hand(pygame.sprite.Sprite):
         self.fist = [self.hand1,self.fist1,self.fist2,self.fist3,
                      self.fist4,self.fist5,self.fist5,self.fist5,
                      self.fist5]
-        self.fistState = False
-        self.fistEnd = False
-        self.x2, self.y2 = 0, 0
-        self.sprite = block.Block(45,45)
-        self.speed_y = 15
-        self.frame = 0
-        self.frame_end = 0
 
+    # The hit function for the fist
     def hit(self,screen,spriteGroup):
         if self.y2 > 307:
             self.fistEnd = True
@@ -61,44 +70,55 @@ class Hand(pygame.sprite.Sprite):
         self.sprite.rect.y = self.y2+10
         if self.fistEnd == False:
             spriteGroup.fist.add(self.sprite)
-        
-    def cursor(self,pos,event,screen,kirby,spriteGroup):
-        #spriteGroup.fist.draw(screen)
-        x, y = pos
-        self.x, self.y = x, y
-        self.event = event
-        cursor_x = x - self.hand1.get_width()*2/7
-        cursor_y = y - self.hand1.get_height()*5/7
-        self.block1.rect.x = x-6
-        self.block1.rect.y = y-6
-        spriteGroup.handCursor.add(self.block1)
+
+    # function for mouse control
+    def mouseControl(self,pos,event,screen,kirby,spriteGroup,x,y,c_x,c_y):
         if event[0] == 1:
             self.frame_hand = 1
             self.startPos = (x, y)
             self.startTime = time.time()
             self.fistState = False
+            self.drawCircle(pos,event,screen,kirby,spriteGroup)
         elif event[0] == 0:
+            if len(self.circle_x)>0 and \
+                    self.checkCircle(self.circle_x,self.circle_y,kirby):
+                kirby.fire = True
+            spriteGroup.circlePixel.empty()
+            self.circle_x = []
+            self.circle_y = []
             self.frame_hand = 0
             self.grab = False
-            self.endPos = (x,y)
-            self.vector = (self.endPos[0]-self.startPos[0],
-                           self.endPos[1]-self.startPos[1])
-            self.endTime = time.time()
-            delta = self.endTime - self.startTime
-            self.vector = ((self.endPos[0]-self.startPos[0])/delta,
-                           (self.endPos[1]-self.startPos[1])/delta)
-        if event[2] == 1 and cursor_y < 307:
+        # press the right button to trigger the fist state
+        if event[2] == 1 and c_y < 307:
             self.fistState = True
-            self.x2, self.y2 = cursor_x, cursor_y
+            self.x2, self.y2 = c_x, c_y
             self.frame, self.frame_end = 0, 0
+    
+    def cursor(self,pos,event,screen,kirby,spriteGroup):
+        x, y = pos
+        self.x, self.y = x, y
+        self.event = event
+        c_x = x - self.hand1.get_width()*2/7
+        c_y = y - self.hand1.get_height()*5/7
+        self.block1.rect.x = x-8
+        self.block1.rect.y = y-8
+        spriteGroup.handCursor.add(self.block1)
+        self.mouseControl(pos,event,screen,kirby,spriteGroup,x,y,c_x,c_y)
         if self.fistState == False:
-            screen.blit(self.hand[self.frame_hand%2],(cursor_x,cursor_y))
+            screen.blit(self.hand[self.frame_hand%2],(c_x,c_y))
             spriteGroup.fist.empty()
             self.fistEnd = False
-        else:
+        else: # if in fist state, call hit function
             self.hit(screen,spriteGroup)
-        #spriteGroup.handCursor.draw(screen)
+        if self.grab: # if grabed, call createVector
+            self.createVector(pos)
+        # if released, init the vector
+        elif self.grab == False and len(self.coordList) == 2:
+            x1, y1 = self.coordList[0][0], self.coordList[0][1]
+            x2, y2 = self.coordList[1][0], self.coordList[1][1]
+            self.vector = ((x2-x1)/5.0,(y2-y1)/5.0)
 
+    # drag function
     def drag(self,event,spriteGroup):
         if event[0] == 1:
             self.frame_hand = 1
@@ -118,4 +138,25 @@ class Hand(pygame.sprite.Sprite):
         else:
             for element in spriteGroup.circlePixel:
                 spriteGroup.circlePixel.remove(element)
+
+    def checkCircle(self,xList,yList,kirby):
+        for i in xrange(len(xList)):
+            x, y = xList[i], yList[i]
+            value = math.hypot(x-kirby.x-13,y-kirby.y-13)
+            if value < 10 or value > 60:
+                return False
+        d = math.hypot(xList[0]-xList[-1],yList[0]-yList[-1])
+        if d > 30:
+            return False
+        return True
+
+    # This function add the latest two coords to the list
+    def createVector(self,pos):
+        x,y = pos
+        if self.grab:
+            if len(self.coordList) > 1:
+                self.coordList.pop(0)
+            self.coordList.append((x,y))
+        
+            
             

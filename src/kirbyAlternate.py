@@ -1,6 +1,7 @@
 import pygame, load, random
 from pygame.locals import *
 
+# Class Kirby, create the main character
 class kirby(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -103,7 +104,7 @@ class kirby(pygame.sprite.Sprite):
         self.kirbyAiri = [self.kirbyAir1,self.kirbyAir2, self.kirbyAir3i]
 
         self.x = 300
-        self.y = 330
+        self.y = 336
         self.speed_x = 0
         self.speed_x2 = 0
         self.speed_y = 0
@@ -111,38 +112,109 @@ class kirby(pygame.sprite.Sprite):
         self.frame_w = 0
         self.frame_f = 0
         self.frame_turn = 0
-        self.frame_blow = 0
+        self.frame_blow = -1
         self.left = False
-        self.right = True
         self.gravity = 0.8
         self.gravity2 = 0.1
         self.airstate = False
         self.flystate = False
         self.blowstate = False
+        self.doubleJump = False
+        self.djTime = 0
+        self.life = 6
+        self.dead = False
+        
 
-    def update(self,event,screen,key):
+        self.spark1 = load.load_image("spark1.png")
+        self.spark2 = load.load_image("spark2.png")
+        self.spark3 = load.load_image("spark3.png")
+        self.sparkle1 = load.load_image("sparkle1.png")
+        self.sparkle2 = load.load_image("sparkle2.png")
+        self.sparkle3 = load.load_image("sparkle3.png")
+        self.spark = [self.spark1,self.spark2,self.spark3]
+        self.frame_spark = 0
+        self.fire = False
+        self.sparkCount = 3
+
+        self.kirbyInvincible1 = load.load_image("kirbyInvincible1.png")
+        self.kirbyInvincible2 = load.load_image("kirbyInvincible2.png")
+        self.frame_inv = 0
+        self.invincible = False
+        self.sprite = block.Block(16,16)
+        self.sprite_spark = block.Block(60,60)
+        self.blood1 = load.load_image("blood1.png")
+        self.blood2 = load.load_image("blood2.png")
+        self.sparkIcon = load.load_image("sparkIcon.png")
+
+    def init(self):
+        self.x = 300
+        self.y = 336
+        self.speed_x = 0
+        self.speed_x2 = 0
+        self.speed_y = 0
+        self.speed_y2 = 0
+        self.frame_w = 0
+        self.frame_f = 0
+        self.frame_turn = 0
+        self.frame_blow = -1
+        self.left = False
+        self.gravity = 0.8
+        self.gravity2 = 0.1
+        self.airstate = False
+        self.flystate = False
+        self.blowstate = False
+        self.doubleJump = False
+        self.djTime = 0
+        self.life = 6
+        self.frame_spark = 0
+        self.fire = False
+        self.frame_inv = 0
+        self.invincible = False
+        self.dead = False
+        self.sparkCount = 3
+        
+    # Defines Kirby's movement in Adventure Mode
+    def update(self,event,screen,key,spriteGroup):
+        self.kirbyControl_a_right(screen,key,event)
+        self.kirbyControl_a_left(screen,key,event)
+        self.kirbyControl_redux(screen,key,event)
+        self.checkState_a(screen,key,event)
+        block.rect.x = self.x
+        block.rect.y = self.y
+        spriteGroup.player.add(block)
+
+    def kirbyControl_a_right(self,screen,key,event):
         if self.left == False:
+            #kirby moves
             if key[pygame.K_RIGHT] and self.airstate == False:
                 screen.blit(self.kirbyMove[self.frame_w%11], (self.x, self.y))
-            elif self.flystate == True and key[pygame.K_x] and not self.blowstate:
+            elif self.flystate and key[pygame.K_x] and not self.blowstate:
                 self.flystate = False
                 self.blowstate = True
                 self.speed_y = 0
                 screen.blit(self.kirbyBlow1, (self.x, self.y))
-                screen.blit(self.kirbyAir2, (self.x+26,self.y+10))
-                self.frame_blow += 1
-            elif self.flystate == True and self.blowstate:
+            elif self.flystate == False and self.blowstate:
                 screen.blit(self.kirbyBlow2, (self.x, self.y))
-                self.blowstate = False
-            elif self.airstate == True and self.flystate == False:
+                screen.blit(self.kirbyAir[self.frame_blow%3],
+                (self.x+20+self.frame_blow*5,self.y+13-self.frame_blow*2))
+                if self.frame_blow > 2:
+                    self.frame_blow = -1
+                    self.blowstate = False
+            elif self.airstate == True and self.flystate == False and self.speed_y>0:
                 screen.blit(self.kirbyJump1, (self.x, self.y))
+            elif self.airstate == True and self.flystate == False and self.speed_y<=0:
+                screen.blit(self.kirbyJump7, (self.x, self.y))
+            #kirby fly
             elif self.airstate == True and self.flystate == True and key[pygame.K_z]:
                 screen.blit(self.kirbyFly[self.frame_f%8], (self.x, self.y))
+            #kirby steady fly mode
             elif self.airstate == True and self.flystate == True:
                 screen.blit(self.kirbyFly1, (self.x, self.y))
             else:
                 screen.blit(self.kirbyMove[0], (self.x, self.y))
-        elif self.left == True:
+
+    def kirbyControl_a_left(self,screen,key,event):
+        if self.left == True:
             if key[pygame.K_LEFT] and self.airstate == False: 
                 screen.blit(self.kirbyMovei[self.frame_w%11], (self.x, self.y))
             elif self.flystate == True and key[pygame.K_x] and not self.blowstate:
@@ -150,18 +222,24 @@ class kirby(pygame.sprite.Sprite):
                 self.blowstate = True
                 self.speed_y = 0
                 screen.blit(self.kirbyBlow1i, (self.x, self.y))
-            elif self.flystate == True and self.blowstate:
+            elif self.flystate == False and self.blowstate:
                 screen.blit(self.kirbyBlow2i, (self.x, self.y))
-                self.blowstate = False
-            elif self.airstate == True and self.flystate == False:
+                screen.blit(self.kirbyAiri[self.frame_blow%3],(self.x-13-self.frame_blow*5,self.y+13-self.frame_blow*2))
+                if self.frame_blow > 2:
+                    self.frame_blow = -1
+                    self.blowstate = False
+            elif self.airstate == True and self.flystate == False and self.speed_y>0:
                 screen.blit(self.kirbyJump1i, (self.x, self.y))
+            elif self.airstate == True and self.flystate == False and self.speed_y<=0:
+                screen.blit(self.kirbyJump7i, (self.x, self.y))
             elif self.airstate == True and self.flystate == True and key[pygame.K_z]:
                 screen.blit(self.kirbyFlyi[self.frame_f%8], (self.x, self.y))
             elif self.airstate == True and self.flystate == True:
                 screen.blit(self.kirbyFly1i, (self.x, self.y))
             else:
                 screen.blit(self.kirbyMovei[0], (self.x, self.y))
-        
+
+    def kirbyControl_redux(self,screen,key,event):
         if key[pygame.K_LEFT] and not key[pygame.K_RIGHT]:
             self.left = True
             self.speed_x = -3
@@ -179,44 +257,26 @@ class kirby(pygame.sprite.Sprite):
             self.speed_x = -3
             self.frame_turn = 0
         if key[pygame.K_z] and self.flystate:
+            self.speed_y2 = 2.5
+        if key[pygame.K_z] and (self.airstate == False):
+            self.speed_y = 8
+            self.airstate = True
+        elif self.airstate and key[pygame.K_z]:
+            self.flystate = True
             self.speed_y2 = 2
-        """if self.flystate and key[pygame.K_x]:
-            self.flystate == False"""
-
-
-        
-        """if event.type == KEYDOWN:
-            if self.airstate and event.key == K_z:
-                self.flystate = True
-                self.speed_y2 = 1.5"""
-
-        
-        if event.type == KEYDOWN:
-            """if event.key == K_LEFT:
-                self.left = True
-                self.right = False
-                self.speed_x = -3
-            elif event.key == K_RIGHT:
-                self.left = False
-                self.right = True
-                self.speed_x = 3"""
-            if event.key == K_z and (self.airstate == False):
-                self.speed_y = 10
-                self.airstate = True
-            elif self.airstate and event.key == K_z:
-                self.flystate = True
-                self.speed_y2 = 2
-                self.gravity2 = 0.1
-            if event.key == K_x and self.flystate:
-                self.flystate = False
-
+            self.gravity2 = 0.1
+        if key[pygame.K_x] and self.flystate:
+            self.speed_y = 0
+            self.flystate = False
         if event.type == KEYUP:
-            if self.left == False:
+            if event.key == K_LEFT or event.key == K_RIGHT:
                 self.speed_x = 0
-            if self.left == True:
-                self.speed_x = 0
-        
+                
+
+    def checkState_a(self,screen,key,event):
         self.x += self.speed_x
+        if self.blowstate:
+            self.frame_blow += 1
 
         if self.airstate == True:
             if self.flystate == False:
@@ -227,24 +287,14 @@ class kirby(pygame.sprite.Sprite):
                 if self.speed_y2 <= -2:
                     self.gravity2 = 0
                 self.speed_y2 -= self.gravity2
-
-        if self.y >= 330:
+        if self.y > 336:
             self.airstate = False
             self.flystate = False
             self.speed_y = 0
             self.speed_y2 = 0
+            self.y = 336
         
         if key[pygame.K_RIGHT] or key[pygame.K_LEFT]:
             self.frame_w += 1
         if key[pygame.K_z] and self.flystate == True:
             self.frame_f += 1
-    
-    def run(self,event,screen,key):
-        pass
-
-    def jump(self,event,screen,key):
-        pass
-
-    def fly(self,event,screen,key):
-        pass
-
