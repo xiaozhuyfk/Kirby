@@ -23,9 +23,9 @@ class menu(object):
     # the run function
     def run(self,screen,event,key):
         if event.type == KEYDOWN:
-            if event.key == K_DOWN:
+            if event.key == K_DOWN and not self.info:
                 self.index += 1
-            if event.key == K_UP:
+            if event.key == K_UP and not self.info:
                 self.index -= 1
             if event.key == K_RETURN:
                 self.enter = True
@@ -33,12 +33,13 @@ class menu(object):
             if event.key == K_RETURN:
                 self.enter = False
         screen.blit(self.menu[self.index%3],(0,0))
-        if self.index%3 == 0 and self.enter: # start game
-            self.start = True
-        elif self.index%3 == 2 and self.enter: # exit game
-            sys.exit()
-        elif self.index%3 == 1 and self.enter: # instruction
-            self.info = True
+        if self.info == False:
+            if self.index%3 == 0 and self.enter: # start game
+                self.start = True
+            elif self.index%3 == 2 and self.enter: # exit game
+                sys.exit()
+            elif self.index%3 == 1 and self.enter: # instruction
+                self.info = True
         if self.info: # if instruction selected, draw the info image
             screen.blit(self.instruction,(50,25))
         if self.info and key[pygame.K_ESCAPE]:

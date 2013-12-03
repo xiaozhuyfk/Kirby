@@ -47,7 +47,7 @@ class subscreen(object):
             self.sub1 = False
             self.startTime = time.time()
         # triggers the subscreen2 after the kirby dies (2s)
-        if time.time()-self.startTime > 2 and kirby.life <= 0: self.sub2 = True
+        if time.time()-self.startTime > 1 and kirby.life <= 0: self.sub2 = True
         # subscreen 1
         if self.sub1 and self.sub2 == False:
             screen.blit(self.subscreen[self.index1%2],(0,0))

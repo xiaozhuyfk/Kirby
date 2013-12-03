@@ -29,9 +29,10 @@ class pikey(pygame.sprite.Sprite):
         self.v_y = 0
 
     # drag function
-    def drag(self,spriteGroup,hand,event):
+    def drag(self,spriteGroup,hand,event,key):
         if pygame.sprite.spritecollide(self.sprite,spriteGroup.handCursor,
-                         False) and event[0] == 1 and hand.grab == False:
+                         False) and event[0] == 1 and hand.grab == False\
+                         and not key[K_b]:
             hand.grab = True
             self.localGrab = True
         if self.localGrab: # if grabed, follow the hand cursor
@@ -45,8 +46,8 @@ class pikey(pygame.sprite.Sprite):
             self.air = True
 
     # Movement function
-    def movement(self,screen,spriteGroup,hand,event):
-        self.drag(spriteGroup,hand,event)
+    def movement(self,screen,spriteGroup,hand,event,key):
+        self.drag(spriteGroup,hand,event,key)
         if self.air == False and self.localGrab == False:
             # Pikey bouncing up and down
             if self.y < self.y_i-66: self.speed_y = -self.speed_y
@@ -69,8 +70,8 @@ class pikey(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self.sprite,spriteGroup.sparkshield,
                                        False): self.dead = True
         self.frame += 1
-        self.sprite.rect.x = self.x 
-        self.sprite.rect.y = self.y 
+        self.sprite.rect.x = self.x+3
+        self.sprite.rect.y = self.y+3
         spriteGroup.enemies.add(self.sprite)
 
 # Shotzo class
@@ -195,9 +196,10 @@ class waddleDee(pygame.sprite.Sprite):
                            self.waddleDee4i,self.waddleDee4i]
 
     # Drag function
-    def drag(self,spriteGroup,hand,event):
-        if pygame.sprite.spritecollide(self.sprite,spriteGroup.handCursor,False)\
-                and event[0] == 1 and hand.grab == False:
+    def drag(self,spriteGroup,hand,event,key):
+        if pygame.sprite.spritecollide(self.sprite,spriteGroup.handCursor,
+           False) and event[0] == 1 and hand.grab == False\
+           and not key[K_b]:
             hand.coordList = []
             hand.grab = True
             self.localGrab = True
@@ -231,8 +233,8 @@ class waddleDee(pygame.sprite.Sprite):
                 self.air = False
         
     # Movement function
-    def movement(self,screen,spriteGroup,hand,event):
-        self.drag(spriteGroup,hand,event)
+    def movement(self,screen,spriteGroup,hand,event,key):
+        self.drag(spriteGroup,hand,event,key)
         self.checkState()
         self.x -= 3
         if self.left:
@@ -292,9 +294,10 @@ class waddleDoo(pygame.sprite.Sprite):
                            self.waddleDoo5i,self.waddleDoo5i]
 
     # Drag Function
-    def drag(self,spriteGroup,hand,event):
-        if pygame.sprite.spritecollide(self.sprite,spriteGroup.handCursor,False)\
-                and event[0] == 1 and hand.grab == False:
+    def drag(self,spriteGroup,hand,event,key):
+        if pygame.sprite.spritecollide(self.sprite,spriteGroup.handCursor,
+           False) and event[0] == 1 and hand.grab == False\
+           and not key[K_b]:
             hand.grab = True
             self.localGrab = True
         if self.localGrab: # if grabed, follows the hand cursor
@@ -327,8 +330,8 @@ class waddleDoo(pygame.sprite.Sprite):
                 self.air = False
 
     # Movement function
-    def movement(self,screen,spriteGroup,hand,event):
-        self.drag(spriteGroup,hand,event)
+    def movement(self,screen,spriteGroup,hand,event,key):
+        self.drag(spriteGroup,hand,event,key)
         self.checkState()
         self.x -= 3
         if self.localGrab == False:
@@ -446,9 +449,10 @@ class flame(pygame.sprite.Sprite):
         self.flame_c = [self.flame9,self.flame10,self.flame11,self.flame12]
 
     # Drag function
-    def drag(self,spriteGroup,hand,event):
+    def drag(self,spriteGroup,hand,event,key):
         if pygame.sprite.spritecollide(self.sprite1,spriteGroup.handCursor,
-                       False) and event[0] == 1 and hand.grab == False:
+                       False) and event[0] == 1 and hand.grab == False\
+                       and not key[K_b]:
             hand.coordList = []
             hand.grab = True
             self.localGrab = True
@@ -504,18 +508,18 @@ class flame(pygame.sprite.Sprite):
             spriteGroup.enemies.remove(self.sprite2)
 
     # movement 1
-    def movement1(self,screen,spriteGroup,hand,event,kirby):
+    def movement1(self,screen,spriteGroup,hand,event,kirby,key):
         self.checkState(kirby,spriteGroup)
         if self.state1:
-            self.normal(screen,spriteGroup,hand,event)
+            self.normal(screen,spriteGroup,hand,event,key)
         elif self.state2:
             self.rotate(screen,spriteGroup,kirby)
         elif self.state3:
             self.rush(screen,spriteGroup)
 
     # normal state movement function
-    def normal(self,screen,spriteGroup,hand,event):
-        self.drag(spriteGroup,hand,event)
+    def normal(self,screen,spriteGroup,hand,event,key):
+        self.drag(spriteGroup,hand,event,key)
         self.checkAir()
         self.x -= 3
         screen.blit(self.flame_a[self.frame%4],(self.x,self.y))

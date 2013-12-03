@@ -3,8 +3,8 @@
 
 # main.py
 
-import pygame, os, sys, kirby, handCursor
-import spriteGroup, landscape, enemies, menu, load, subscreen
+import pygame, os, sys, kirby, handCursor, time
+import spriteGroup, landscape, enemies, menu, load, subscreen, powerup
 from pygame.locals import *
 
 #Pygame Init
@@ -35,7 +35,7 @@ def addPikey():
         pikey = enemies.pikey(600,336)
         data.pikeyList.append(pikey)
     for p in data.pikeyList:
-        p.movement(screen,spriteGroup,hand,mouseEvent)
+        p.movement(screen,spriteGroup,hand,mouseEvent,key)
         if p.x < -26:
             data.pikeyList.remove(p)
             spriteGroup.enemies.remove(p.sprite)
@@ -69,7 +69,7 @@ def addWaddleDee():
         waddleDee = enemies.waddleDee(600,336)
         data.waddleDeeList.append(waddleDee)
     for dee in data.waddleDeeList:
-        dee.movement(screen,spriteGroup,hand,mouseEvent)
+        dee.movement(screen,spriteGroup,hand,mouseEvent,key)
         if dee.x < -26:
             data.waddleDeeList.remove(dee)
             spriteGroup.enemies.remove(dee.sprite)
@@ -83,7 +83,7 @@ def addWaddleDoo():
         waddleDoo = enemies.waddleDoo(600,336)
         data.waddleDooList.append(waddleDoo)
     for doo in data.waddleDooList:
-        doo.movement(screen,spriteGroup,hand,mouseEvent)
+        doo.movement(screen,spriteGroup,hand,mouseEvent,key)
         if doo.x < -26:
             data.waddleDooList.remove(doo)
             spriteGroup.enemies.remove(doo.sprite)
@@ -111,20 +111,48 @@ def addFlame():
         flame = enemies.flame(600,320)
         data.flameList.append(flame)
     for f in data.flameList:
-        f.movement1(screen,spriteGroup,hand,mouseEvent,kirby)
+        f.movement1(screen,spriteGroup,hand,mouseEvent,kirby,key)
         if f.x < -26 or f.dead:
             data.flameList.remove(f)
             spriteGroup.enemies.remove(f.sprite1)
             spriteGroup.enemies.remove(f.sprite2)
-        
-# Add enemies
-def addEnemy():
+
+
+# Add Potion
+def addPotion():
+    if kirby.frame_w % 523 == 30:
+        potion = powerup.potion(600,326)
+        data.potionList.append(potion)
+    for p in data.potionList:
+        p.movement(screen,spriteGroup,kirby)
+        if p.x < -36 or p.dead:
+            data.potionList.remove(p)
+            spriteGroup.powerup.remove(p.sprite)
+
+# Add Spark
+def addSpark():
+    if kirby.frame_w % 611 == 90:
+        spark = powerup.spark(600,326)
+        data.sparkList.append(spark)
+        spark.time = time.time()
+    for s in data.sparkList:
+        s.movement(screen,spriteGroup,kirby,hand,mouseEvent,key)
+        if s.x < -36 or s.dead:
+            data.sparkList.remove(s)
+            spriteGroup.powerup.remove(s.sprite)
+        if time.time()-s.time > 20:
+            s.dead = True
+            
+# Add Objects
+def addObject():
     addPikey()
     addShotzo()
     addWaddleDee()
     addWaddleDoo()
     addBird()
     addFlame()
+    addPotion()
+    addSpark()
 
 # Init function to restart the game
 def init():
@@ -137,6 +165,8 @@ def init():
     data.waddleDooList = []
     data.birdList = []
     data.flameList = []
+    data.potionList = []
+    data.sparkList = []
     data.start = False
     data.restart = False
     data.play1 = False
@@ -171,10 +201,10 @@ while 1:
         if data.pause == False and kirby.life > 0:
             screen.fill((255,255,255))
             landscape.create(screen,spriteGroup) # load the background
-            addEnemy()
+            addObject()
             kirby.update(event,screen,key,spriteGroup) # Kirby's movement
             # mouse cursor
-            hand.cursor(mouse_pos,mouseEvent,screen,kirby,spriteGroup)
+            hand.cursor(mouse_pos,mouseEvent,screen,kirby,spriteGroup,key)
         subscreen.run(screen,event,key,kirby,menu) # load subscreen
         clock.tick(20)
         pygame.display.update()

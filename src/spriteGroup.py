@@ -18,3 +18,4 @@ class spriteGroup(object):
         self.dragable = pygame.sprite.Group()
         self.sparkshield = pygame.sprite.Group()
         self.circlePixel = pygame.sprite.Group()
+        self.powerup = pygame.sprite.Group()
