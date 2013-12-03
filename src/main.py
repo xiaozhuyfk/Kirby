@@ -28,17 +28,6 @@ class Struct: pass
 data = Struct()
 data.menuMusic = load.load_sound("menu.wav")
 data.gameMusic = load.load_sound("game.wav")
-data.startGame = False
-data.pause = False
-data.shotzoList = [] # store enemy instances
-data.pikeyList = []
-data.bulletList = []
-data.waddleDeeList = []
-data.waddleDooList = []
-data.start = False
-data.restart = False
-data.play1 = False # variables for playing different music
-data.play2 = False
 
 # Add Pikey
 def addPikey():
@@ -102,12 +91,40 @@ def addWaddleDoo():
             data.waddleDooList.remove(doo)
             spriteGroup.enemies.remove(doo.sprite)
 
+# Add Bird
+def addBird():
+    if kirby.frame_w % 217 == 30:
+        bird = enemies.bird(600,300)
+        data.birdList.append(bird)
+    for b in data.birdList:
+        b.movement(screen,spriteGroup,hand,mouseEvent)
+        if b.x < -26:
+            data.birdList.remove(b)
+            spriteGroup.enemies.remove(b.sprite)
+        if b.dead:
+            data.birdList.remove(b)
+            spriteGroup.enemies.remove(b.sprite)
+
+# Add Flame
+def addFlame():
+    if kirby.frame_w % 183 == 90:
+        flame = enemies.flame(600,320)
+        data.flameList.append(flame)
+    for f in data.flameList:
+        f.movement1(screen,spriteGroup,hand,mouseEvent,kirby)
+        if f.x < -26 or f.dead:
+            data.flameList.remove(f)
+            spriteGroup.enemies.remove(f.sprite1)
+            spriteGroup.enemies.remove(f.sprite2)
+        
 # Add enemies
 def addEnemy():
     addPikey()
     addShotzo()
     addWaddleDee()
     addWaddleDoo()
+    addBird()
+    addFlame()
 
 # Init function to restart the game
 def init():
@@ -118,6 +135,8 @@ def init():
     data.bulletList = []
     data.waddleDeeList = []
     data.waddleDooList = []
+    data.birdList = []
+    data.flameList = []
     data.start = False
     data.restart = False
     data.play1 = False
@@ -125,6 +144,8 @@ def init():
     spriteGroup.enemies.empty()
     spriteGroup.sparkshield.empty()
     kirby.init()
+
+init()
     
 while 1:
     event = pygame.event.poll()
@@ -141,6 +162,7 @@ while 1:
     if data.restart:
         init()
         subscreen.init()
+        hand.fistState = False
     if data.start: # Start the game
         if data.play2 == False:
             data.gameMusic.play(-1)

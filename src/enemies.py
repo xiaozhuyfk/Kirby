@@ -5,7 +5,7 @@
 
 from pygame.locals import *
 import pygame, load, block
-import math
+import math, time
 
 # Pikey Class
 class pikey(pygame.sprite.Sprite):
@@ -18,6 +18,7 @@ class pikey(pygame.sprite.Sprite):
         self.sprite = block.Block(19,19)
         self.x = x
         self.y = y
+        self.y_i = y
         self.speed_x = 0
         self.speed_y = 3
         self.gravity = 0.3
@@ -29,8 +30,8 @@ class pikey(pygame.sprite.Sprite):
 
     # drag function
     def drag(self,spriteGroup,hand,event):
-        if pygame.sprite.spritecollide(self.sprite,spriteGroup.handCursor,False)\
-                and event[0] == 1 and hand.grab == False:
+        if pygame.sprite.spritecollide(self.sprite,spriteGroup.handCursor,
+                         False) and event[0] == 1 and hand.grab == False:
             hand.grab = True
             self.localGrab = True
         if self.localGrab: # if grabed, follow the hand cursor
@@ -48,10 +49,9 @@ class pikey(pygame.sprite.Sprite):
         self.drag(spriteGroup,hand,event)
         if self.air == False and self.localGrab == False:
             # Pikey bouncing up and down
-            if self.y < 270:
-                self.speed_y = -self.speed_y
-            if self.y > 336:
-                self.y = 336
+            if self.y < self.y_i-66: self.speed_y = -self.speed_y
+            if self.y > self.y_i:
+                self.y = self.y_i
                 self.speed_y = -self.speed_y
             self.x += self.speed_x
             self.y += self.speed_y
@@ -59,14 +59,15 @@ class pikey(pygame.sprite.Sprite):
             self.x += self.v_x
             self.y += self.speed_y
             self.speed_y += self.gravity
-            if self.y > 336:
-                self.speed_y = 336
+            if self.y > self.y_i:
+                self.y = self.y_i
                 self.speed_y = 3
                 self.air = False
         self.x -= 3
         screen.blit(self.pikey[self.frame%4],(self.x,self.y))
-        if pygame.sprite.spritecollide(self.sprite,spriteGroup.sparkshield,False):
-            self.dead = True
+        # it dies when collided with spark shield
+        if pygame.sprite.spritecollide(self.sprite,spriteGroup.sparkshield,
+                                       False): self.dead = True
         self.frame += 1
         self.sprite.rect.x = self.x 
         self.sprite.rect.y = self.y 
@@ -146,12 +147,14 @@ class bullet(pygame.sprite.Sprite):
         if pygame.sprite.spritecollide(self.sprite,spriteGroup.player,False):
             spriteGroup.enemies.remove(self.sprite)
             self.dead = True
-        if pygame.sprite.spritecollide(self.sprite,spriteGroup.sparkshield,False):
+        if pygame.sprite.spritecollide(self.sprite,spriteGroup.sparkshield,
+                                       False):
             self.dead = True
         self.sprite.rect.x = self.x+4
         self.sprite.rect.y = self.y+4
         spriteGroup.enemies.add(self.sprite)
 
+# WaddleDee Class
 class waddleDee(pygame.sprite.Sprite):
     def __init__(self,x,y):
         self.loadImage()                  
@@ -159,6 +162,7 @@ class waddleDee(pygame.sprite.Sprite):
         self.sprite = block.Block(17,17)
         self.x = x
         self.y = y
+        self.y_i = y
         self.speed_x = 2
         self.speed_y = 3
         self.gravity = 0.3
@@ -207,11 +211,12 @@ class waddleDee(pygame.sprite.Sprite):
             self.localGrab = False
             self.air = True
 
+    # modify the coords according to different states
     def checkState(self):
         # if not in the air and not grabed, moves back and forth
         if self.air == False and self.localGrab == False:
-            if self.y > 336:
-                self.y = 336
+            if self.y > self.y_i:
+                self.y = self.y_i
             if self.frame % 50 == 1:
                 self.speed_x = -self.speed_x
                 self.left = not self.left
@@ -220,8 +225,8 @@ class waddleDee(pygame.sprite.Sprite):
             self.x += self.v_x
             self.y += self.speed_y
             self.speed_y += self.gravity
-            if self.y > 336:
-                self.speed_y = 336
+            if self.y > self.y_i:
+                self.y = self.y_i
                 self.speed_y = 3
                 self.air = False
         
@@ -252,6 +257,7 @@ class waddleDoo(pygame.sprite.Sprite):
         self.sprite = block.Block(18,18)
         self.x = x
         self.y = y
+        self.y_i = y
         self.speed_x = 2
         self.speed_y = 3
         self.gravity = 0.3
@@ -262,6 +268,7 @@ class waddleDoo(pygame.sprite.Sprite):
         self.v_x = 0
         self.v_y = 0
 
+    # load images
     def loadImage(self):
         self.waddleDoo1 = load.load_image("waddleDoo1.png")
         self.waddleDoo2 = load.load_image("waddleDoo2.png")
@@ -300,11 +307,12 @@ class waddleDoo(pygame.sprite.Sprite):
             self.localGrab = False
             self.air = True
 
+    # modify coords according to different states
     def checkState(self):
         # if not in the air and not grabed, moves back and forth
         if self.air == False and self.localGrab == False:
-            if self.y > 336:
-                self.y = 336
+            if self.y > self.y_i:
+                self.y = self.y_i
             if self.frame % 60 == 1:
                 self.speed_x = -self.speed_x
                 self.left = not self.left
@@ -313,8 +321,8 @@ class waddleDoo(pygame.sprite.Sprite):
             self.x += self.v_x
             self.y += self.speed_y
             self.speed_y += self.gravity
-            if self.y > 336:
-                self.speed_y = 336
+            if self.y > self.y_i:
+                self.y = self.y_i
                 self.speed_y = 3
                 self.air = False
 
@@ -333,7 +341,8 @@ class waddleDoo(pygame.sprite.Sprite):
                 screen.blit(self.waddleDoo5,(self.x,self.y))
             else:
                 screen.blit(self.waddleDoo5i,(self.x,self.y))
-        if pygame.sprite.spritecollide(self.sprite,spriteGroup.sparkshield,False):
+        if pygame.sprite.spritecollide(self.sprite,spriteGroup.sparkshield,
+                                       False):
             self.dead = True
         if pygame.sprite.spritecollide(self.sprite,spriteGroup.fist,False):
             self.dead = True
@@ -342,9 +351,233 @@ class waddleDoo(pygame.sprite.Sprite):
         self.sprite.rect.x = self.x + 3
         self.sprite.rect.y = self.y + 3
         spriteGroup.enemies.add(self.sprite)
+
+# Flame Class
+class bird(pygame.sprite.Sprite):
+    def __init__(self,x,y):
+        self.loadImage()
+        self.frame = 0
+        self.sprite = block.Block(18,18)
+        self.x = x
+        self.y = y
+        self.y_i = y
+        self.speed_x = 5
+        self.speed_y = 2
+        self.gravity = 0.3
+        self.localGrab = False
+        self.air = False
+        self.dead = False
+        self.left = True
+        self.v_x = 0
+        self.v_y = 0
         
-        
-        
-        
-    
-        
+    def loadImage(self):
+        self.bird1 = load.load_image("bird1.png")
+        self.bird2 = load.load_image("bird2.png")
+        self.bird3 = load.load_image("bird3.png")
+        self.bird4 = load.load_image("bird4.png")
+        self.bird5 = load.load_image("bird5.png")
+        self.bird = [self.bird1, self.bird2, self.bird3,
+                     self.bird4, self.bird5]
+
+    # movement function
+    def movement(self,screen,spriteGroup,hand,event):
+        # moves up and down
+        if self.y < self.y_i-20:
+            self.y = self.y_i-20
+            self.speed_y = -self.speed_y
+        if self.y > self.y_i+20:
+            self.y = self.y_i+20
+            self.speed_y = -self.speed_y
+        self.x -= self.speed_x
+        self.y += self.speed_y
+        screen.blit(self.bird[self.frame%5],(self.x,self.y))
+        # if collided with spark or fist, it dies
+        if pygame.sprite.spritecollide(self.sprite,spriteGroup.sparkshield,
+                                       False):
+            self.dead = True
+        if pygame.sprite.spritecollide(self.sprite,spriteGroup.fist,False):
+            self.dead = True
+        self.frame += 1
+        self.sprite.rect.x = self.x + 4
+        self.sprite.rect.y = self.y + 4
+        spriteGroup.enemies.add(self.sprite)
+
+# Frame Class
+class flame(pygame.sprite.Sprite):
+    def __init__(self,x,y):
+        self.loadImage()
+        self.frame = 0
+        self.sprite1 = block.Block(13,18)
+        self.sprite2 = block.Block(24,18)
+        self.x, self.y = x, y
+        self.y_i = y
+        self.speed_x, self.speed_y  = 2, 3
+        self.gravity = 0.3
+        self.localGrab = False
+        self.air = False
+        self.dead = False
+        self.left = True
+        self.v_x, self.v_y  = 0, 0
+        self.state1 = True
+        self.state2 = False
+        self.state3 = False
+        self.frame_normal = 0
+        self.frame_rotate = 0
+        self.frame_rush = 0
+        self.start = 0
+        self.adjust = False
+
+    def loadImage(self):
+        self.flame1 = load.load_image("flame1.png")
+        self.flame2 = load.load_image("flame2.png")
+        self.flame3 = load.load_image("flame3.png")
+        self.flame4 = load.load_image("flame4.png")
+        self.flame5 = load.load_image("flame5.png")
+        self.flame6 = load.load_image("flame6.png")
+        self.flame7 = load.load_image("flame7.png")
+        self.flame8 = load.load_image("flame8.png")
+        self.flame9 = load.load_image("flame9.png")
+        self.flame10 = load.load_image("flame10.png")
+        self.flame11 = load.load_image("flame11.png")
+        self.flame12 = load.load_image("flame12.png")
+        self.flame_a = [self.flame1,self.flame2,self.flame3,self.flame4]
+        self.flame_b = [self.flame5,self.flame6,self.flame7,self.flame8]
+        self.flame_c = [self.flame9,self.flame10,self.flame11,self.flame12]
+
+    # Drag function
+    def drag(self,spriteGroup,hand,event):
+        if pygame.sprite.spritecollide(self.sprite1,spriteGroup.handCursor,
+                       False) and event[0] == 1 and hand.grab == False:
+            hand.coordList = []
+            hand.grab = True
+            self.localGrab = True
+        if self.localGrab: # if grabed, follows the hand cursor
+            self.x = hand.x-9
+            self.y = hand.y-9
+        # if released, create vector
+        if self.localGrab and hand.grab == False:
+            self.v_x, self.v_y = hand.vector[0], hand.vector[1]
+            self.speed_y += self.v_y
+            self.localGrab = False
+            self.air = True
+
+    # Adjust coords when in the air
+    def checkAir(self):
+        if self.air == False and self.localGrab == False:
+            if self.y > self.y_i:
+                self.y -= 1
+            if self.y < self.y_i:
+                self.y += 1
+            self.x -= self.speed_x
+        elif self.air: # if in the air, follows the gravity
+            self.x += self.v_x
+            self.y += self.speed_y
+            self.speed_y += self.gravity
+            if self.y > self.y_i:
+                self.y = self.y_i
+                self.speed_y = 3
+                self.air = False
+    # Change different states according different conditions
+    def checkState(self,kirby,spriteGroup):
+        # distance between flame and kirby
+        d = math.hypot(self.x-kirby.x,self.y-kirby.y-3)
+        d_y = abs(self.y-kirby.y-3) # vertical distance
+        if d_y > 20 and self.state2:
+            self.start = time.time()
+        if self.state1 and d < 60 and self.localGrab == False:
+            self.state1 = False
+            self.state2 = True
+            #self.x = 400
+            self.frame = 0
+            self.start = time.time()
+        elif self.state2 and time.time()-self.start > 1.2:
+            self.state2 = False
+            self.state3 = True
+            self.adjust = False
+            self.frame_rotate = 0
+            self.start = time.time()
+        elif self.state3 and self.frame_rush > 15:
+            self.state3 = False
+            self.state1 = True
+            self.frame_rush = 0
+            spriteGroup.enemies.remove(self.sprite2)
+
+    # movement 1
+    def movement1(self,screen,spriteGroup,hand,event,kirby):
+        self.checkState(kirby,spriteGroup)
+        if self.state1:
+            self.normal(screen,spriteGroup,hand,event)
+        elif self.state2:
+            self.rotate(screen,spriteGroup,kirby)
+        elif self.state3:
+            self.rush(screen,spriteGroup)
+
+    # normal state movement function
+    def normal(self,screen,spriteGroup,hand,event):
+        self.drag(spriteGroup,hand,event)
+        self.checkAir()
+        self.x -= 3
+        screen.blit(self.flame_a[self.frame%4],(self.x,self.y))
+        if pygame.sprite.spritecollide(self.sprite1,spriteGroup.sparkshield,
+                                       False):
+            self.dead = True
+        if pygame.sprite.spritecollide(self.sprite1,spriteGroup.fist,False):
+            self.dead = True
+        self.frame += 1
+        self.sprite1.rect.x = self.x + 4
+        self.sprite1.rect.y = self.y + 4
+        spriteGroup.enemies.add(self.sprite1)
+
+    # rotate state movement function
+    def rotate(self,screen,spriteGroup,kirby):
+        screen.blit(self.flame_b[self.frame_rotate%4],(self.x,self.y))
+        if self.adjust:
+            if kirby.y - self.y + 3 > 2:
+                self.y += 2
+            elif kirby.y - self.y + 3 < -2:
+                self.y -= 2
+        else: 
+            self.x += 1
+            self.y -= 1
+        if self.x-kirby.x > 100:
+            self.adjust = True          
+        if pygame.sprite.spritecollide(self.sprite1,spriteGroup.sparkshield,
+                                       False):
+            self.dead = True
+        if pygame.sprite.spritecollide(self.sprite1,spriteGroup.fist,False):
+            self.dead = True
+        self.frame_rotate += 1
+        self.sprite1.rect.x = self.x + 4
+        self.sprite1.rect.y = self.y + 4
+        spriteGroup.enemies.add(self.sprite1)
+
+    # rush state movement function
+    def rush(self,screen,spriteGroup):
+        screen.blit(self.flame_c[self.frame_rush%4],(self.x,self.y))
+        self.x -= 12
+        if pygame.sprite.spritecollide(self.sprite2,spriteGroup.sparkshield,
+                                       False):
+            self.dead = True
+        if pygame.sprite.spritecollide(self.sprite2,spriteGroup.fist,False):
+            self.dead = True
+        self.frame_rush += 1
+        self.sprite2.rect.x = self.x + 4
+        self.sprite2.rect.y = self.y + 4
+        spriteGroup.enemies.add(self.sprite2)
+
+    # movement 2
+    def movement2(self,screen,spriteGroup,hand,event):
+        screen.blit(self.flame_c[self.frame%4],(self.x,self.y))
+        self.x -= 12
+        if pygame.sprite.spritecollide(self.sprite2,spriteGroup.sparkshield,
+                                       False):
+            self.dead = True
+            spriteGroup.enemies.remove(self.sprite2)
+        if pygame.sprite.spritecollide(self.sprite2,spriteGroup.fist,False):
+            self.dead = True
+            spriteGroup.enemies.remove(self.sprite2)
+        self.frame += 1
+        self.sprite2.rect.x = self.x + 4
+        self.sprite2.rect.y = self.y + 4
+        spriteGroup.enemies.add(self.sprite2)   

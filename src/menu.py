@@ -1,6 +1,12 @@
+# 15-112 Term Project
+# Hongyu Li + hongyul + Section J
+
+# menu.py
+
 import pygame, os, sys, load
 from pygame.locals import *
 
+# start menu class
 class menu(object):
     def __init__(self):
         self.menu1 = load.load_image("menu1.png")
@@ -14,6 +20,7 @@ class menu(object):
         self.menuSound = load.load_sound("menuDing.WAV")
         self.enter = False
 
+    # the run function
     def run(self,screen,event,key):
         if event.type == KEYDOWN:
             if event.key == K_DOWN:
@@ -26,13 +33,13 @@ class menu(object):
             if event.key == K_RETURN:
                 self.enter = False
         screen.blit(self.menu[self.index%3],(0,0))
-        if self.index%3 == 0 and self.enter:
+        if self.index%3 == 0 and self.enter: # start game
             self.start = True
-        elif self.index%3 == 2 and self.enter:
+        elif self.index%3 == 2 and self.enter: # exit game
             sys.exit()
-        elif self.index%3 == 1 and self.enter:
+        elif self.index%3 == 1 and self.enter: # instruction
             self.info = True
-        if self.info:
+        if self.info: # if instruction selected, draw the info image
             screen.blit(self.instruction,(50,25))
         if self.info and key[pygame.K_ESCAPE]:
             self.info = False

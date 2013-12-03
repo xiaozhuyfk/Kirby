@@ -39,7 +39,8 @@ class kirby(pygame.sprite.Sprite):
         self.frame_inv = 0
         self.invincible = False
         self.dead = False
-        self.sparkCount = 3
+        self.sparkCount = 4
+        self.score = 0
 
     # Init images for move
     def loadMove(self):
@@ -92,6 +93,7 @@ class kirby(pygame.sprite.Sprite):
         self.blood1 = load.load_image("blood1.png")
         self.blood2 = load.load_image("blood2.png")
         self.sparkIcon = load.load_image("sparkIcon.png")
+        self.font = load.load_font("Transformers.ttf",25)
 
     # Defines kirby's movement
     def update(self,event,screen,key,spriteGroup):
@@ -107,7 +109,9 @@ class kirby(pygame.sprite.Sprite):
             self.invincible = False
             self.frame_inv = 0
         self.drawLife(screen)
-        self.drawSpark(screen)       
+        self.drawSpark(screen)
+        self.drawScore(screen)
+        self.score += 1
 
     # Triggers the spark shield when called
     def fireSpark(self,screen,spriteGroup):
@@ -188,12 +192,11 @@ class kirby(pygame.sprite.Sprite):
     def drawSpark(self,screen):
         w = self.sparkIcon.get_width()
         x = 25
-        y = 15
+        y = 30
         for i in xrange(self.sparkCount):
             screen.blit(self.sparkIcon,(x+i*w,y))
-        
-        
 
-        
-
-        
+    def drawScore(self,screen):
+        text = "SCORE: %d" % self.score
+        text = self.font.render(text,True,(255,255,255))
+        screen.blit(text,(25,10))    

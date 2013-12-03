@@ -2,6 +2,7 @@
 # Hongyu Li + hongyul + Section J
 
 # load.py
+# functions for loading resources
 
 from pygame.locals import *
 import os, pygame

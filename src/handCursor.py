@@ -80,8 +80,10 @@ class Hand(pygame.sprite.Sprite):
             self.fistState = False
             self.drawCircle(pos,event,screen,kirby,spriteGroup)
         elif event[0] == 0:
-            if len(self.circle_x)>0 and \
-                    self.checkCircle(self.circle_x,self.circle_y,kirby):
+            # create spark shield when drawing a circle
+            if len(self.circle_x)>0 and not kirby.fire and kirby.sparkCount>0\
+                    and self.checkCircle(self.circle_x,self.circle_y,kirby):
+                kirby.sparkCount -= 1
                 kirby.fire = True
             spriteGroup.circlePixel.empty()
             self.circle_x = []
