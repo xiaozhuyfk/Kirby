@@ -63,18 +63,8 @@ class kirby(pygame.sprite.Sprite):
     # Init images for jump
     def loadJump(self):
         self.kirbyJump1 = load.load_image("kirbyJump1.png")
-        self.kirbyJump2 = load.load_image("kirbyJump2.png")
-        self.kirbyJump3 = load.load_image("kirbyJump3.png")
-        self.kirbyJump4 = load.load_image("kirbyJump4.png")
-        self.kirbyJump5 = load.load_image("kirbyJump5.png")
-        self.kirbyJump6 = load.load_image("kirbyJump6.png")
         self.kirbyJump7 = load.load_image("kirbyJump7.png")
-        self.kirbyJump8 = load.load_image("kirbyJump8.png")
-        self.kirbyJump9 = load.load_image("kirbyJump9.png")
-        self.kirbyJump = [self.kirbyJump1,
-        self.kirbyJump3, self.kirbyJump4, self.kirbyJump5,
-        self.kirbyJump6, self.kirbyJump7, self.kirbyJump8,
-        self.kirbyJump9]
+
 
     # Init images for spark
     def loadSpark(self):

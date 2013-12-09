@@ -28,6 +28,10 @@ class Struct: pass
 data = Struct()
 data.menuMusic = load.load_sound("menu.wav")
 data.gameMusic = load.load_sound("game.wav")
+data.event = pygame.event.poll()
+data.key = pygame.key.get_pressed()
+data.mouse_pos = pygame.mouse.get_pos()
+data.mouseEvent = pygame.mouse.get_pressed()
 
 # Add Pikey
 def addPikey():
@@ -35,7 +39,7 @@ def addPikey():
         pikey = enemies.pikey(600,336)
         data.pikeyList.append(pikey)
     for p in data.pikeyList:
-        p.movement(screen,spriteGroup,hand,mouseEvent,key)
+        p.movement(screen,spriteGroup,hand,data.mouseEvent,data.key)
         if p.x < -26:
             data.pikeyList.remove(p)
             spriteGroup.enemies.remove(p.sprite)
@@ -69,7 +73,7 @@ def addWaddleDee():
         waddleDee = enemies.waddleDee(600,336)
         data.waddleDeeList.append(waddleDee)
     for dee in data.waddleDeeList:
-        dee.movement(screen,spriteGroup,hand,mouseEvent,key)
+        dee.movement(screen,spriteGroup,hand,data.mouseEvent,data.key)
         if dee.x < -26:
             data.waddleDeeList.remove(dee)
             spriteGroup.enemies.remove(dee.sprite)
@@ -83,7 +87,7 @@ def addWaddleDoo():
         waddleDoo = enemies.waddleDoo(600,336)
         data.waddleDooList.append(waddleDoo)
     for doo in data.waddleDooList:
-        doo.movement(screen,spriteGroup,hand,mouseEvent,key)
+        doo.movement(screen,spriteGroup,hand,data.mouseEvent,data.key)
         if doo.x < -26:
             data.waddleDooList.remove(doo)
             spriteGroup.enemies.remove(doo.sprite)
@@ -97,7 +101,7 @@ def addBird():
         bird = enemies.bird(600,300)
         data.birdList.append(bird)
     for b in data.birdList:
-        b.movement(screen,spriteGroup,hand,mouseEvent)
+        b.movement(screen,spriteGroup,hand,data.mouseEvent)
         if b.x < -26:
             data.birdList.remove(b)
             spriteGroup.enemies.remove(b.sprite)
@@ -111,7 +115,7 @@ def addFlame():
         flame = enemies.flame(600,320)
         data.flameList.append(flame)
     for f in data.flameList:
-        f.movement1(screen,spriteGroup,hand,mouseEvent,kirby,key)
+        f.movement1(screen,spriteGroup,hand,data.mouseEvent,kirby,data.key)
         if f.x < -26 or f.dead:
             data.flameList.remove(f)
             spriteGroup.enemies.remove(f.sprite1)
@@ -120,7 +124,7 @@ def addFlame():
 
 # Add Potion
 def addPotion():
-    if kirby.frame_w % 523 == 30:
+    if kirby.frame_w % 523 == 300:
         potion = powerup.potion(600,326)
         data.potionList.append(potion)
     for p in data.potionList:
@@ -131,12 +135,12 @@ def addPotion():
 
 # Add Spark
 def addSpark():
-    if kirby.frame_w % 611 == 90:
+    if kirby.frame_w % 611 == 300:
         spark = powerup.spark(600,326)
         data.sparkList.append(spark)
         spark.time = time.time()
     for s in data.sparkList:
-        s.movement(screen,spriteGroup,kirby,hand,mouseEvent,key)
+        s.movement(screen,spriteGroup,kirby,hand,data.mouseEvent,data.key)
         if s.x < -36 or s.dead:
             data.sparkList.remove(s)
             spriteGroup.powerup.remove(s.sprite)
@@ -175,20 +179,8 @@ def init():
     spriteGroup.sparkshield.empty()
     kirby.init()
 
-init()
-    
-while 1:
-    event = pygame.event.poll()
-    key = pygame.key.get_pressed()
-    mouse_pos = pygame.mouse.get_pos()
-    mouseEvent = pygame.mouse.get_pressed()
-    pygame.mouse.set_visible(False) # hide the cursor
-    if event.type == QUIT:
-        sys.exit()
-    #Stores menu's and subscreen's properties into data
-    data.start = menu.start
-    data.pause = subscreen.pause
-    data.restart = subscreen.restart
+# the run function in the mainloop
+def run(event,key,mouse_pos,mouseEvent):
     if data.restart:
         init()
         subscreen.init()
@@ -207,11 +199,28 @@ while 1:
             hand.cursor(mouse_pos,mouseEvent,screen,kirby,spriteGroup,key)
         subscreen.run(screen,event,key,kirby,menu) # load subscreen
         clock.tick(20)
-        pygame.display.update()
     else: # if the game is not started, show the menu
         data.gameMusic.stop()
         if data.play1 == False:
             data.menuMusic.play(-1)
             data.play1 = True
         menu.run(screen,event,key) # run menu
-        pygame.display.update()
+    pygame.display.update()
+
+def mainloop():
+    while 1:
+        data.event = pygame.event.poll()
+        data.key = pygame.key.get_pressed()
+        data.mouse_pos = pygame.mouse.get_pos()
+        data.mouseEvent = pygame.mouse.get_pressed()
+        pygame.mouse.set_visible(False) # hide the cursor
+        if data.event.type == QUIT:
+            sys.exit()
+        #Stores menu's and subscreen's properties into data
+        data.start = menu.start
+        data.pause = subscreen.pause
+        data.restart = subscreen.restart
+        run(data.event,data.key,data.mouse_pos,data.mouseEvent)
+    
+init()
+mainloop()

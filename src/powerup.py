@@ -22,10 +22,8 @@ class potion(pygame.sprite.Sprite):
         # if collided with Kirby, add 2 more lives
         if pygame.sprite.spritecollide(self.sprite,spriteGroup.player,False):
             self.dead = True
-            if kirby.life == 5:
+            if kirby.life < 6:
                 kirby.life += 1
-            if kirby.life <= 4:
-                kirby.life += 2
         self.sprite.rect.x = self.x+6
         self.sprite.rect.y = self.y+6
         spriteGroup.powerup.add(self.sprite)
@@ -66,13 +64,16 @@ class spark(pygame.sprite.Sprite):
         self.drag(spriteGroup,hand,event,key)
         w = self.spark.get_width()
         # bouncing in the screen
-        if self.start:
-            if self.x < 0 or self.x > 600-w:
-                self.speed_x = -self.speed_x
-            if self.y < 0 or self.y > self.y_i:
-                self.speed_y = -self.speed_y
-        self.x -= self.speed_x
-        self.y -= self.speed_y
+        if self.localGrab == False:
+            if self.start:
+                if self.x < 0 or self.x > 600-w:
+                    self.speed_x = -self.speed_x
+                if self.y < 0 or self.y > self.y_i:
+                    self.speed_y = -self.speed_y
+            if self.y > self.y_i:
+                self.y = self.y_i
+            self.x -= self.speed_x
+            self.y -= self.speed_y
         if self.start == False and self.x <= 600-w:
             self.start = True
         screen.blit(self.spark,(self.x,self.y))
